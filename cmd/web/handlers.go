@@ -32,7 +32,6 @@ func editContact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Тут мы будем редактировать контакт"))
 }
 
-// Удаление существующего контакта
 func deleteContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodDelete)
 	if disabled {
@@ -41,12 +40,10 @@ func deleteContact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Удаляет существующий контакт"))
 }
 
-// Ищет дублирующие контакты
 func findDublicatedContacts(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Список дублирующихся контактов"))
 }
 
-// Проверяет поддержку http-метода
 func handlerAllowedMethod(w http.ResponseWriter, r *http.Request, method string) (bool, http.ResponseWriter) {
 	forbidden := r.Method != method
 	w.Header().Set("Content-Type", "application/json")
