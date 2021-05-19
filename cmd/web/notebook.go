@@ -1,12 +1,14 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func main() {
+	addr := flag.String("addr", ":8090", "Сетевой адрес HTTP")
+	flag.Parse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/hello", home)
 	mux.HandleFunc("/contact/all", allContacts)
@@ -16,8 +18,7 @@ func main() {
 	mux.HandleFunc("/contact/delete", deleteContact)
 	mux.HandleFunc("/contact/dublicates", findDublicatedContacts)
 
-	port := 8090
-	log.Println("Запуск веб-сервера на http://127.0.0.1:", port)
-	err := http.ListenAndServe(":"+strconv.Itoa(port), mux)
+	log.Printf("Запуск веб-сервера на %s", *addr)
+	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)
 }
