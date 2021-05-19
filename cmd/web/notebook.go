@@ -7,19 +7,30 @@ import (
 	"os"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	addr := flag.String("addr", ":8090", "Сетевой адрес HTTP")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.LstdFlags)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.LstdFlags|log.Lshortfile)
+
+	app := &application{
+		infoLog:  infoLog,
+		errorLog: errorLog,
+	}
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/hello", home)
-	mux.HandleFunc("/contact/all", allContacts)
-	mux.HandleFunc("/contact/get", contact)
-	mux.HandleFunc("/contact/create", createContact)
-	mux.HandleFunc("/contact/edit", editContact)
-	mux.HandleFunc("/contact/delete", deleteContact)
+	mux.HandleFunc("/hello", app.home)
+	mux.HandleFunc("/contact/all", app.allContacts)
+	mux.HandleFunc("/contact/get", app.contact)
+	mux.HandleFunc("/contact/create", app.createContact)
+	mux.HandleFunc("/contact/edit", app.editContact)
+	mux.HandleFunc("/contact/delete", app.deleteContact)
 	mux.HandleFunc("/contact/dublicates", findDublicatedContacts)
 
 	srv := &http.Server{

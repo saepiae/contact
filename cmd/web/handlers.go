@@ -2,11 +2,10 @@ package main
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./ui/html/home.page.tmpl",
 		"./ui/html/base.layout.tmpl",
@@ -14,26 +13,26 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Упс... что-то пошло не так", 500)
 		return
 	}
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
-func contact(w http.ResponseWriter, r *http.Request) {
+func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Тут будет подробно описан контакт"))
 }
 
-func allContacts(w http.ResponseWriter, r *http.Request) {
+func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Тут доступен список всех контактов"))
 }
 
-func createContact(w http.ResponseWriter, r *http.Request) {
+func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodPost)
 	if disabled {
 		return
@@ -41,7 +40,7 @@ func createContact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Тут будет возможность добавить новый контакт"))
 }
 
-func editContact(w http.ResponseWriter, r *http.Request) {
+func (app *application) editContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodPut)
 	if disabled {
 		return
@@ -49,7 +48,7 @@ func editContact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Тут мы будем редактировать контакт"))
 }
 
-func deleteContact(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodDelete)
 	if disabled {
 		return
