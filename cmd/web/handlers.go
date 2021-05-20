@@ -13,14 +13,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		app.errorLog.Println(err.Error())
-		http.Error(w, "Упс... что-то пошло не так", 500)
+		app.serverError(w, err)
 		return
 	}
 	err = ts.Execute(w, nil)
 	if err != nil {
-		app.errorLog.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 	}
 }
 
@@ -33,7 +31,7 @@ func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
-	disabled, w := handlerAllowedMethod(w, r, http.MethodPost)
+	disabled, w := handlerAllowedMethod(w, r, http.MethodPost, app)
 	if disabled {
 		return
 	}
@@ -41,7 +39,7 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) editContact(w http.ResponseWriter, r *http.Request) {
-	disabled, w := handlerAllowedMethod(w, r, http.MethodPut)
+	disabled, w := handlerAllowedMethod(w, r, http.MethodPut, app)
 	if disabled {
 		return
 	}
@@ -49,7 +47,7 @@ func (app *application) editContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteContact(w http.ResponseWriter, r *http.Request) {
-	disabled, w := handlerAllowedMethod(w, r, http.MethodDelete)
+	disabled, w := handlerAllowedMethod(w, r, http.MethodDelete, app)
 	if disabled {
 		return
 	}
@@ -60,13 +58,12 @@ func findDublicatedContacts(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Список дублирующихся контактов"))
 }
 
-func handlerAllowedMethod(w http.ResponseWriter, r *http.Request, method string) (bool, http.ResponseWriter) {
+func handlerAllowedMethod(w http.ResponseWriter, r *http.Request, method string, app *application) (bool, http.ResponseWriter) {
 	forbidden := r.Method != method
 	w.Header().Set("Content-Type", "application/json")
 	if forbidden {
 		w.Header().Add("Allow", method)
-		w.WriteHeader(405)
-		w.Write([]byte("Поддерживается только " + method + " метод"))
+		app.clientError(w, http.StatusMethodNotAllowed)
 	}
 	return forbidden, w
 }
