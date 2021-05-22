@@ -1,6 +1,9 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
+
 	"github.com/jackc/pgx"
 	"github.com/saepiae/contact/pkg/models"
 )
@@ -21,7 +24,17 @@ func (m *ContactModel) Insert(firstName string, lastName string, middleName stri
 }
 
 func (m *ContactModel) Get(id int) (*models.Contact, error) {
-	return nil, nil
+	result := &models.Contact{}
+	stmt := `select id, first_name, last_name, middle_name, phone, email, address, created from contact_table where id = $1`
+	row := m.ConnPool.QueryRow(stmt, id)
+	err := row.Scan(&result.ID, &result.FirstName, &result.LastName, &result.MiddleName, &result.Phone, &result.Email, &result.Address, &result.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		}
+		return nil, err
+	}
+	return result, nil
 }
 
 func (m *ContactModel) Update(id int, first_name string, last_name string, middle_name string, phone string, email string, address string) (int, error) {

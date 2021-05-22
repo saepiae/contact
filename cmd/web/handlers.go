@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/saepiae/contact/pkg/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +33,17 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
+	c, err := app.contacts.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
 	w.Write([]byte("Тут будет подробно описан контакт c id = " + strconv.Itoa(id)))
+	fmt.Fprintf(w, "%v", c)
 }
 
 func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
