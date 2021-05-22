@@ -42,7 +42,6 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	w.Write([]byte("Тут будет подробно описан контакт c id = " + strconv.Itoa(id)))
 	fmt.Fprintf(w, "%v", c)
 }
 
