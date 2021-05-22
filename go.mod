@@ -1,4 +1,4 @@
-module ru.ich.home/notebook
+module github.com/saepiae/contact
 
 go 1.16
 
