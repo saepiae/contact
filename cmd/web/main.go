@@ -24,19 +24,10 @@ func main() {
 		errorLog: errorLog,
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/hello", app.home)
-	mux.HandleFunc("/contact/all", app.allContacts)
-	mux.HandleFunc("/contact/get", app.contact)
-	mux.HandleFunc("/contact/create", app.createContact)
-	mux.HandleFunc("/contact/edit", app.editContact)
-	mux.HandleFunc("/contact/delete", app.deleteContact)
-	mux.HandleFunc("/contact/dublicates", findDublicatedContacts)
-
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routers(),
 	}
 
 	infoLog.Printf("Запуск веб-сервера на %s", *addr)
