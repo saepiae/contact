@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/jackc/pgx"
-	_ "github.com/jackc/pgx"
 	_ "github.com/jackc/pgx/v4"
 )
 

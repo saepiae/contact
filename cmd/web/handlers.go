@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +24,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) contact(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Тут будет подробно описан контакт"))
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		app.notFound(w)
+		return
+	}
+	w.Write([]byte("Тут будет подробно описан контакт c id = " + strconv.Itoa(id)))
 }
 
 func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
