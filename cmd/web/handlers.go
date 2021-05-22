@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -42,6 +43,18 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Тут будет возможность добавить новый контакт"))
+	firstName := "firstName"
+	lastName := "lastName"
+	middleName := "middleName"
+	phone := "phone"
+	email := "email"
+	address := "address"
+	id, err := app.contacts.Insert(firstName, lastName, middleName, phone, email, address)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/contact/get?id=%d", id), http.StatusSeeOther)
 }
 
 func (app *application) editContact(w http.ResponseWriter, r *http.Request) {

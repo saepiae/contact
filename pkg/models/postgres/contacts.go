@@ -9,8 +9,15 @@ type ContactModel struct {
 	ConnPool *pgx.ConnPool
 }
 
-func (m *ContactModel) Insert(first_name string, last_name string, middle_name string, phone string, email string, address string) (int, error) {
-	return 0, nil
+func (m *ContactModel) Insert(firstName string, lastName string, middleName string, phone string, email string, address string) (int, error) {
+	var row int
+	stmt := `INSERT INTO contact_table (first_name, last_name, middle_name, phone, email, address, created) VALUES 
+	($1, $2, $3, $4, $5, $6, now()) RETURNING id`
+	err := m.ConnPool.QueryRow(stmt, firstName, lastName, middleName, phone, email, address).Scan(&row)
+	if err != nil {
+		return 0, err
+	}
+	return int(row), nil
 }
 
 func (m *ContactModel) Get(id int) (*models.Contact, error) {
