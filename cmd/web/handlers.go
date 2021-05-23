@@ -46,7 +46,14 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Тут доступен список всех контактов"))
+	contacts, err := app.contacts.FindAll()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	for _, contact := range contacts {
+		fmt.Fprintf(w, "%v\n", contact)
+	}
 }
 
 func (app *application) createContact(w http.ResponseWriter, r *http.Request) {

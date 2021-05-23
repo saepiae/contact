@@ -46,7 +46,27 @@ func (m *ContactModel) Delete(id int) (int, error) {
 }
 
 func (m *ContactModel) FindAll() ([]*models.Contact, error) {
-	return nil, nil
+	stmt := `select id, first_name, last_name, middle_name, phone, email, address, created from contact_table`
+	rows, err := m.ConnPool.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var contacts []*models.Contact
+	for rows.Next() {
+		contact := &models.Contact{}
+		err = rows.Scan(&contact.ID, &contact.FirstName, &contact.LastName, &contact.MiddleName, &contact.Phone, &contact.Email, &contact.Address, &contact.Created)
+		if err != nil {
+			return nil, err
+		}
+		contacts = append(contacts, contact)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return contacts, nil
 }
 
 func (m *ContactModel) FindDublicates() ([]int, error) {
