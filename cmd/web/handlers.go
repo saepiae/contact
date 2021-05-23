@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -9,6 +10,16 @@ import (
 
 	"github.com/saepiae/contact/pkg/models"
 )
+
+type newContact struct {
+	ID         int
+	FirstName  string
+	LastName   string
+	MiddleName string
+	Phone      string
+	Email      string
+	Address    string
+}
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
@@ -61,14 +72,14 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 	if disabled {
 		return
 	}
-	w.Write([]byte("Тут будет возможность добавить новый контакт"))
-	firstName := "firstName"
-	lastName := "lastName"
-	middleName := "middleName"
-	phone := "phone"
-	email := "email"
-	address := "address"
-	id, err := app.contacts.Insert(firstName, lastName, middleName, phone, email, address)
+	decoder := json.NewDecoder(r.Body)
+	var contact newContact
+	err := decoder.Decode(&contact)
+	if err != nil {
+		app.clientError(w, 400)
+		return
+	}
+	id, err := app.contacts.Insert(contact.FirstName, contact.LastName, contact.MiddleName, contact.Phone, contact.Email, contact.Address)
 	if err != nil {
 		app.serverError(w, err)
 		return
