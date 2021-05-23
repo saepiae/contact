@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,19 +13,19 @@ import (
 )
 
 type NewContact struct {
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
-	MiddleName string `json:"middleName"`
-	Phone      string `json:"phone"`
-	Email      string `json:"email"`
-	Address    string `json:"address"`
+	FirstName  string         `json:"firstName"`
+	LastName   string         `json:"lastName"`
+	MiddleName sql.NullString `json:"middleName"`
+	Phone      string         `json:"phone"`
+	Email      sql.NullString `json:"email"`
+	Address    sql.NullString `json:"address"`
 }
 
 type ShortContact struct {
-	Id         int    `json:"id"`
-	FirstName  string `json:"firstName"`
-	LastName   string `json:"lastName"`
-	MiddleName string `json:"middleName"`
+	Id         int            `json:"id"`
+	FirstName  string         `json:"firstName"`
+	LastName   string         `json:"lastName"`
+	MiddleName sql.NullString `json:"middleName"`
 }
 
 // Просто рандомная страница, которая возвращает некую html- страничку
