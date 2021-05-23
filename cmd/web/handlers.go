@@ -20,6 +20,13 @@ type NewContact struct {
 	Address    string `json:"address"`
 }
 
+type ShortContact struct {
+	Id         int    `json:"id"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	MiddleName string `json:"middleName"`
+}
+
 // Просто рандомная страница, которая возвращает некую html- страничку
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
@@ -45,7 +52,7 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-	c, err := app.contacts.Get(id)
+	contact, err := app.contacts.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFound(w)
@@ -54,11 +61,12 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	data, err := json.Marshal(c)
+	data, err := json.Marshal(contact)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "%v\n", string(data))
 }
 
@@ -69,9 +77,13 @@ func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+	output := make(map[string]ShortContact)
+	for index, value := range contacts {
+		output[strconv.Itoa(index)] = ShortContact{value.ID, value.FirstName, value.LastName, value.MiddleName}
+	}
 	w.Header().Set("Content-Type", "application/json")
 
-	data, err := json.Marshal(contacts)
+	data, err := json.Marshal(output)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -157,7 +169,7 @@ func (app *application) deleteContact(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	http.Redirect(w, r, fmt.Sprintf("/contact/all"), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintln("/contact/all"), http.StatusSeeOther)
 }
 
 func findDublicatedContacts(w http.ResponseWriter, r *http.Request) {
