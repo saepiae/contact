@@ -8,12 +8,12 @@ import (
 var ErrNoRecord = errors.New("models: подходящей записи не найдено")
 
 type Contact struct {
-	ID         int
-	FirstName  string
-	LastName   string
-	MiddleName string
-	Phone      string
-	Email      string
-	Address    string
-	Created    time.Time
+	ID         int       `json:"id"`
+	FirstName  string    `json:"firstName"`
+	LastName   string    `json:"lastName"`
+	MiddleName string    `json:"middleName"`
+	Phone      string    `json:"phone"`
+	Email      string    `json:"email"`
+	Address    string    `json:"address"`
+	Created    time.Time `json:"created"`
 }

@@ -11,14 +11,13 @@ import (
 	"github.com/saepiae/contact/pkg/models"
 )
 
-type newContact struct {
-	ID         int
-	FirstName  string
-	LastName   string
-	MiddleName string
-	Phone      string
-	Email      string
-	Address    string
+type NewContact struct {
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	MiddleName string `json:"middleName"`
+	Phone      string `json:"phone"`
+	Email      string `json:"email"`
+	Address    string `json:"address"`
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +52,12 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	fmt.Fprintf(w, "%v", c)
+	data, err := json.Marshal(c)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	fmt.Fprintf(w, "%v\n", string(data))
 }
 
 func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
@@ -62,9 +66,14 @@ func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	for _, contact := range contacts {
-		fmt.Fprintf(w, "%v\n", contact)
+	w.Header().Set("Content-Type", "application/json")
+
+	data, err := json.Marshal(contacts)
+	if err != nil {
+		app.serverError(w, err)
+		return
 	}
+	fmt.Fprintf(w, "%v\n", string(data))
 }
 
 func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
@@ -73,12 +82,15 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	decoder := json.NewDecoder(r.Body)
-	var contact newContact
+	decoder.DisallowUnknownFields()
+
+	var contact NewContact
 	err := decoder.Decode(&contact)
 	if err != nil {
 		app.clientError(w, 400)
 		return
 	}
+
 	id, err := app.contacts.Insert(contact.FirstName, contact.LastName, contact.MiddleName, contact.Phone, contact.Email, contact.Address)
 	if err != nil {
 		app.serverError(w, err)
