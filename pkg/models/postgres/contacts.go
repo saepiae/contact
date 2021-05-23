@@ -37,8 +37,25 @@ func (m *ContactModel) Get(id int) (*models.Contact, error) {
 	return result, nil
 }
 
-func (m *ContactModel) Update(id int, first_name string, last_name string, middle_name string, phone string, email string, address string) (int, error) {
-	return 0, nil
+func (m *ContactModel) Update(id int, firstName string, lastName string, middleName string, phone string, email string, address string) (int, error) {
+	stmt := `update contact_table
+	set first_name  = $1,
+		last_name   = $2,
+		middle_name = $3,
+		phone       = $4,
+		email       = $5,
+		address     = $6
+	where id = $7
+	RETURNING id;`
+	var row int
+	err := m.ConnPool.QueryRow(stmt, firstName, lastName, middleName, phone, email, address, id).Scan(&row)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.ErrNoRecord
+		}
+		return 0, err
+	}
+	return int(row), nil
 }
 
 func (m *ContactModel) Delete(id int) (int, error) {

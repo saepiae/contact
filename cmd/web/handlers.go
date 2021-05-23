@@ -20,6 +20,7 @@ type NewContact struct {
 	Address    string `json:"address"`
 }
 
+// Просто рандомная страница, которая возвращает некую html- страничку
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./ui/html/home.page.tmpl",
@@ -37,6 +38,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Возвращает контакт с указанным id
 func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
@@ -60,6 +62,7 @@ func (app *application) contact(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%v\n", string(data))
 }
 
+// Возвращает все контакты
 func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 	contacts, err := app.contacts.FindAll()
 	if err != nil {
@@ -76,6 +79,7 @@ func (app *application) allContacts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%v\n", string(data))
 }
 
+// Добавляет новый контакт
 func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodPost, app)
 	if disabled {
@@ -99,14 +103,41 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/contact/get?id=%d", id), http.StatusSeeOther)
 }
 
+// Редактирует существующий контакт
 func (app *application) editContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodPut, app)
 	if disabled {
 		return
 	}
-	w.Write([]byte("Тут мы будем редактировать контакт"))
+
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	var contact NewContact
+	err = decoder.Decode(&contact)
+	if err != nil {
+		app.clientError(w, 400)
+		return
+	}
+
+	id, err = app.contacts.Update(id, contact.FirstName, contact.LastName, contact.MiddleName, contact.Phone, contact.Email, contact.Address)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/contact/get?id=%d", id), http.StatusSeeOther)
 }
 
+// Удаляет контакт по указанному id
 func (app *application) deleteContact(w http.ResponseWriter, r *http.Request) {
 	disabled, w := handlerAllowedMethod(w, r, http.MethodDelete, app)
 	if disabled {
