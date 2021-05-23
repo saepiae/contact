@@ -12,7 +12,7 @@ type ContactModel struct {
 	ConnPool *pgx.ConnPool
 }
 
-func (m *ContactModel) Insert(firstName string, lastName string, middleName string, phone string, email string, address string) (int, error) {
+func (m *ContactModel) Insert(firstName string, lastName string, middleName sql.NullString, phone string, email sql.NullString, address sql.NullString) (int, error) {
 	var row int
 	stmt := `INSERT INTO contact_table (first_name, last_name, middle_name, phone, email, address, created) VALUES 
 	($1, $2, $3, $4, $5, $6, now()) RETURNING id`
@@ -37,7 +37,7 @@ func (m *ContactModel) Get(id int) (*models.Contact, error) {
 	return result, nil
 }
 
-func (m *ContactModel) Update(id int, firstName string, lastName string, middleName string, phone string, email string, address string) (int, error) {
+func (m *ContactModel) Update(id int, firstName string, lastName string, middleName sql.NullString, phone string, email sql.NullString, address sql.NullString) (int, error) {
 	stmt := `update contact_table
 	set first_name  = $1,
 		last_name   = $2,
