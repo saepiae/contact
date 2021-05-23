@@ -59,7 +59,16 @@ func (m *ContactModel) Update(id int, firstName string, lastName string, middleN
 }
 
 func (m *ContactModel) Delete(id int) (int, error) {
-	return 0, nil
+	stmt := `DELETE FROM contact_table WHERE id = $1 RETURNING id;`
+	var row int
+	err := m.ConnPool.QueryRow(stmt, id).Scan(&row)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.ErrNoRecord
+		}
+		return 0, err
+	}
+	return int(row), nil
 }
 
 func (m *ContactModel) FindAll() ([]*models.Contact, error) {

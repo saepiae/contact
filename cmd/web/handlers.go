@@ -143,7 +143,21 @@ func (app *application) deleteContact(w http.ResponseWriter, r *http.Request) {
 	if disabled {
 		return
 	}
-	w.Write([]byte("Удаляет существующий контакт"))
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		app.notFound(w)
+		return
+	}
+	_, err = app.contacts.Delete(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/contact/all"), http.StatusSeeOther)
 }
 
 func findDublicatedContacts(w http.ResponseWriter, r *http.Request) {
